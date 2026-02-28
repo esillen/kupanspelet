@@ -22,12 +22,12 @@ export function createWorldConfig(width, height) {
     floorY: height - 48,
   };
 
-  const platform = {
-    x: world.width * 0.5,
-    y: world.height * 0.53,
-    w: 380,
-    h: 26,
-  };
+  const platforms = [
+    { x: world.width * 0.5, y: world.height * 0.53, w: 380, h: 26 },
+    { x: world.width * 0.25, y: world.height * 0.68, w: 270, h: 24 },
+    { x: world.width * 0.75, y: world.height * 0.68, w: 270, h: 24 },
+    { x: world.width * 0.5, y: world.height * 0.36, w: 220, h: 22 },
+  ];
 
-  return { world, platform };
+  return { world, platforms };
 }
