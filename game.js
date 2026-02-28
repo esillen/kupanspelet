@@ -12,10 +12,11 @@ const WORLD = {
 const PLATFORM = {
   x: WORLD.width * 0.5,
   y: WORLD.height * 0.53,
-  w: 300,
+  w: 380,
   h: 26,
 };
 
+const HUMAN_PLAYER_COUNT = 4;
 const NPC_COUNT = 8;
 const EVOLUTION_THRESHOLDS = [2, 4, 7];
 const PLAYER_RESPAWN_TIME = 2.2;
@@ -51,7 +52,7 @@ window.addEventListener("gamepadconnected", () => restart());
 window.addEventListener("gamepaddisconnected", () => restart());
 
 function createEntity(id, kind, source = "keyboard") {
-  const baseRadius = kind === "npc" ? 19 + Math.random() * 8 : 30;
+  const baseRadius = kind === "npc" ? 15 + Math.random() * 6 : 24;
   return {
     id,
     kind,
@@ -95,7 +96,7 @@ function setEvolvedStats(entity) {
 
 function buildEntities() {
   const pads = Array.from(navigator.getGamepads ? navigator.getGamepads() : []).filter(Boolean);
-  const playerCount = Math.max(2, pads.length + 1);
+  const playerCount = HUMAN_PLAYER_COUNT;
   const entities = [];
 
   for (let i = 0; i < playerCount; i += 1) {
@@ -103,11 +104,9 @@ function buildEntities() {
     entities.push(player);
   }
 
-  pads.forEach((pad, idx) => {
-    const owner = idx + 2;
-    if (!entities[owner]) entities[owner] = createEntity(owner, "player", "gamepad");
-    entities[owner].source = "gamepad";
-    entities[owner].gamepadIndex = pad.index;
+  pads.slice(0, HUMAN_PLAYER_COUNT).forEach((pad, idx) => {
+    if (!entities[idx]) entities[idx] = createEntity(idx, "player", "keyboard");
+    entities[idx].gamepadIndex = pad.index;
   });
 
   const offset = entities.length;
@@ -134,7 +133,7 @@ function inputForPlayer(entity) {
   if (state.pressed.has(map.right)) input.move += 1;
   if (state.pressed.has(map.jump)) input.jump = true;
 
-  if (entity.source === "gamepad" && entity.gamepadIndex !== null) {
+  if (entity.gamepadIndex !== null) {
     const pad = navigator.getGamepads()[entity.gamepadIndex];
     if (pad) {
       const axis = pad.axes[0] || 0;
@@ -218,7 +217,7 @@ function respawnEntity(entity) {
   entity.evolutionStage = 0;
 
   if (entity.kind === "player") {
-    entity.x = 90 + (entity.id * 180) % (WORLD.width - 180);
+    entity.x = 100 + (entity.id * ((WORLD.width - 200) / Math.max(1, HUMAN_PLAYER_COUNT - 1)));
     entity.y = entity.radius + 8;
     return;
   }
