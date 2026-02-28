@@ -19,6 +19,29 @@ function drawArena(ctx, world, platforms) {
   }
 }
 
+function drawArmorPickup(ctx, armor) {
+  if (!armor || !armor.active) return;
+
+  const bob = Math.sin(armor.phase) * 3;
+  const x = armor.x;
+  const y = armor.y + bob;
+  const r = armor.radius;
+
+  ctx.fillStyle = "#94a3b8";
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = "#e2e8f0";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(x, y, r * 0.72, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.fillStyle = "#334155";
+  ctx.fillRect(x - r * 0.25, y - r * 0.72, r * 0.5, r * 0.42);
+}
+
 function drawEvolutionParts(ctx, entity) {
   const stage = entity.evolutionStage;
 
@@ -48,6 +71,60 @@ function drawEvolutionParts(ctx, entity) {
     ctx.quadraticCurveTo(entity.x + entity.radius * 0.5, entity.y - entity.radius * 1.35, entity.x + entity.radius * 0.12, entity.y - entity.radius * 1.45);
     ctx.stroke();
   }
+}
+
+function drawSword(ctx, entity) {
+  if (entity.evolutionStage < 1) return;
+
+  const facing = entity.facing || 1;
+  const swingProgress = Math.max(0, Math.min(1, entity.attackTimer / 0.16));
+  const swing = Math.sin(swingProgress * Math.PI) * 0.95;
+  const baseAngle = facing > 0 ? -0.25 : Math.PI + 0.25;
+  const angle = baseAngle + (facing > 0 ? -swing : swing);
+
+  const handX = entity.x + facing * entity.radius * 0.55;
+  const handY = entity.y + entity.radius * 0.05;
+  const bladeLen = entity.radius * 1.2;
+  const tipX = handX + Math.cos(angle) * bladeLen;
+  const tipY = handY + Math.sin(angle) * bladeLen;
+
+  ctx.strokeStyle = "#f8fafc";
+  ctx.lineWidth = Math.max(3, entity.radius * 0.14);
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(handX, handY);
+  ctx.lineTo(tipX, tipY);
+  ctx.stroke();
+
+  const hiltLen = entity.radius * 0.35;
+  const nx = Math.cos(angle + Math.PI / 2) * hiltLen * 0.5;
+  const ny = Math.sin(angle + Math.PI / 2) * hiltLen * 0.5;
+  ctx.strokeStyle = "#7f1d1d";
+  ctx.lineWidth = Math.max(3, entity.radius * 0.18);
+  ctx.beginPath();
+  ctx.moveTo(handX - nx, handY - ny);
+  ctx.lineTo(handX + nx, handY + ny);
+  ctx.stroke();
+}
+
+function drawEquippedArmor(ctx, entity) {
+  if (!entity.hasArmor) return;
+
+  const side = entity.armorSide || 1;
+  const cx = entity.x + side * entity.radius * 0.42;
+  const cy = entity.y + entity.radius * 0.06;
+  const rr = entity.radius * 0.58;
+
+  ctx.fillStyle = "rgba(148,163,184,0.9)";
+  ctx.beginPath();
+  ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = "#f8fafc";
+  ctx.lineWidth = Math.max(2, entity.radius * 0.09);
+  ctx.beginPath();
+  ctx.arc(cx, cy, rr * 0.6, 0, Math.PI * 2);
+  ctx.stroke();
 }
 
 function drawEntity(ctx, entity) {
@@ -84,6 +161,9 @@ function drawEntity(ctx, entity) {
   ctx.fill();
   ctx.shadowBlur = 0;
 
+  drawEquippedArmor(ctx, entity);
+  drawSword(ctx, entity);
+
   ctx.beginPath();
   ctx.arc(entity.x - entity.radius * 0.22, entity.y - entity.radius * 0.17, entity.radius * 0.11, 0, Math.PI * 2);
   ctx.arc(entity.x + entity.radius * 0.22, entity.y - entity.radius * 0.17, entity.radius * 0.11, 0, Math.PI * 2);
@@ -97,9 +177,10 @@ function drawEntity(ctx, entity) {
   ctx.fillText(tag, entity.x, entity.y + entity.radius * 0.18);
 }
 
-export function render(ctx, entities, config) {
+export function render(ctx, state, config) {
   drawArena(ctx, config.world, config.platforms);
-  for (const entity of entities) {
+  drawArmorPickup(ctx, state.armorPickup);
+  for (const entity of state.entities) {
     drawEntity(ctx, entity);
   }
 }

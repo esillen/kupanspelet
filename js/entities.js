@@ -32,6 +32,12 @@ export function createEntity(id, kind, world) {
     evolutionStage: 0,
     respawnTimer: 0,
     invulnTimer: 0,
+    facing: 1,
+    attackHeld: false,
+    attackTimer: 0,
+    attackCooldown: 0,
+    hasArmor: false,
+    armorSide: 0,
     ai: {
       jumpCooldown: Math.random() * 0.8,
       roamDir: Math.random() < 0.5 ? -1 : 1,
@@ -85,6 +91,12 @@ export function respawnEntity(entity, world) {
   entity.jumpHeld = false;
   entity.respawnTimer = 0;
   entity.invulnTimer = 0.8;
+  entity.facing = 1;
+  entity.attackHeld = false;
+  entity.attackTimer = 0;
+  entity.attackCooldown = 0;
+  entity.hasArmor = false;
+  entity.armorSide = 0;
   entity.mass = entity.baseRadius * entity.baseRadius;
   entity.radius = entity.baseRadius;
   entity.eatenCount = 0;

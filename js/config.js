@@ -3,12 +3,14 @@ export const NPC_COUNT = 8;
 export const EVOLUTION_THRESHOLDS = [2, 4, 7];
 export const PLAYER_RESPAWN_TIME = 0;
 export const NPC_RESPAWN_TIME = 2.0;
+export const ARMOR_RESPAWN_TIME = 6.0;
+export const ARMOR_PICKUP_RADIUS = 14;
 
 export const KEYMAPS = [
-  { left: "KeyA", right: "KeyD", jump: "KeyW" },
-  { left: "ArrowLeft", right: "ArrowRight", jump: "ArrowUp" },
-  { left: "KeyJ", right: "KeyL", jump: "KeyI" },
-  { left: "Numpad4", right: "Numpad6", jump: "Numpad8" },
+  { left: "KeyA", right: "KeyD", jump: "KeyW", attack: "KeyB" },
+  { left: "ArrowLeft", right: "ArrowRight", jump: "ArrowUp", attack: "Slash" },
+  { left: "KeyJ", right: "KeyL", jump: "KeyI", attack: "KeyO" },
+  { left: "Numpad4", right: "Numpad6", jump: "Numpad8", attack: "Numpad9" },
 ];
 
 export const PLAYER_COLORS = ["#ff2d55", "#00e5ff", "#ffd60a", "#00f57a"];

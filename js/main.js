@@ -1,6 +1,6 @@
 import { createWorldConfig } from "./config.js";
 import { buildEntities } from "./entities.js";
-import { update } from "./gameplay.js";
+import { createArmorPickup, update } from "./gameplay.js";
 import { bindInput } from "./input.js";
 import { render } from "./render.js";
 
@@ -11,12 +11,14 @@ const config = createWorldConfig(canvas.width, canvas.height);
 
 const state = {
   entities: [],
+  armorPickup: null,
   pressed: new Set(),
   lastTime: 0,
 };
 
 function restart() {
   state.entities = buildEntities(config.world);
+  state.armorPickup = createArmorPickup(config);
   state.lastTime = 0;
 }
 
@@ -28,7 +30,7 @@ function frame(ts) {
   state.lastTime = ts;
 
   update(state, config, dt);
-  render(ctx, state.entities, config);
+  render(ctx, state, config);
 
   requestAnimationFrame(frame);
 }

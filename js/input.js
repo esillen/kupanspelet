@@ -13,12 +13,13 @@ export function bindInput(win, state, restart) {
 }
 
 export function inputForPlayer(entity, state) {
-  const input = { move: 0, jump: false };
+  const input = { move: 0, jump: false, attack: false };
 
   const map = entity.keyboardMap;
   if (state.pressed.has(map.left)) input.move -= 1;
   if (state.pressed.has(map.right)) input.move += 1;
   if (state.pressed.has(map.jump)) input.jump = true;
+  if (state.pressed.has(map.attack)) input.attack = true;
 
   if (entity.gamepadIndex !== null) {
     const pad = navigator.getGamepads()[entity.gamepadIndex];
@@ -28,9 +29,11 @@ export function inputForPlayer(entity, state) {
       if (axis > 0.2) input.move = 1;
       const jumpPressed =
         (pad.buttons[0] && pad.buttons[0].pressed) ||
-        (pad.buttons[1] && pad.buttons[1].pressed) ||
+        (pad.buttons[3] && pad.buttons[3].pressed) ||
         (pad.buttons[11] && pad.buttons[11].pressed);
       if (jumpPressed) input.jump = true;
+      const attackPressed = pad.buttons[1] && pad.buttons[1].pressed;
+      if (attackPressed) input.attack = true;
     }
   }
 
@@ -38,7 +41,7 @@ export function inputForPlayer(entity, state) {
 }
 
 export function inputForNpc(entity, entities, dt) {
-  const input = { move: 0, jump: false };
+  const input = { move: 0, jump: false, attack: false };
   const aliveOthers = entities.filter((p) => p.alive && p.id !== entity.id);
   if (!aliveOthers.length) return input;
 
