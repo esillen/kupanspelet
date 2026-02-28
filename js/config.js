@@ -11,7 +11,8 @@ export const KEYMAPS = [
   { left: "Numpad4", right: "Numpad6", jump: "Numpad8" },
 ];
 
-export const COLORS = ["#ef4444", "#22c55e", "#a78bfa", "#f97316", "#06b6d4", "#eab308", "#f43f5e", "#84cc16"];
+export const PLAYER_COLORS = ["#ff2d55", "#00e5ff", "#ffd60a", "#00f57a"];
+export const NPC_COLOR = "#8b93a6";
 
 export function createWorldConfig(width, height) {
   const world = {

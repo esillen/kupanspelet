@@ -1,10 +1,11 @@
 import {
-  COLORS,
   EVOLUTION_THRESHOLDS,
   HUMAN_PLAYER_COUNT,
   KEYMAPS,
+  NPC_COLOR,
   NPC_COUNT,
   NPC_RESPAWN_TIME,
+  PLAYER_COLORS,
   PLAYER_RESPAWN_TIME,
 } from "./config.js";
 
@@ -23,7 +24,7 @@ export function createEntity(id, kind, world) {
     alive: true,
     onGround: false,
     jumpHeld: false,
-    color: COLORS[id % COLORS.length],
+    color: kind === "player" ? PLAYER_COLORS[id % PLAYER_COLORS.length] : NPC_COLOR,
     keyboardMap: KEYMAPS[id] || KEYMAPS[KEYMAPS.length - 1],
     gamepadIndex: null,
     eatenCount: 0,
