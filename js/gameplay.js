@@ -41,7 +41,8 @@ function resolveBlobCollision(a, b) {
 
 function updateMovement(entity, input, dt, world, platforms) {
   const speedBase = entity.kind === "npc" ? 470 : 520;
-  const jumpPower = entity.kind === "npc" ? 930 : 980;
+  const jumpBase = entity.kind === "npc" ? 980 : 1040;
+  const jumpSizePenalty = entity.kind === "npc" ? 4.4 : 4.8;
   const maxSpeed = Math.max(230, speedBase - entity.radius * 2.2);
 
   entity.vx += input.move * 1800 * dt;
@@ -49,7 +50,7 @@ function updateMovement(entity, input, dt, world, platforms) {
   entity.vx = Math.max(-maxSpeed, Math.min(maxSpeed, entity.vx));
 
   if (input.jump && entity.onGround && !entity.jumpHeld) {
-    entity.vy = -Math.max(430, jumpPower - entity.radius * 3.2);
+    entity.vy = -Math.max(430, jumpBase - entity.radius * jumpSizePenalty);
     entity.onGround = false;
   }
   entity.jumpHeld = input.jump;
