@@ -39,7 +39,7 @@ function resolveBlobCollision(a, b) {
   }
 }
 
-function updateMovement(entity, input, dt, world, platform) {
+function updateMovement(entity, input, dt, world, platforms) {
   const speedBase = entity.kind === "npc" ? 470 : 520;
   const jumpPower = entity.kind === "npc" ? 930 : 980;
   const maxSpeed = Math.max(230, speedBase - entity.radius * 2.2);
@@ -74,17 +74,25 @@ function updateMovement(entity, input, dt, world, platform) {
     entity.onGround = true;
   }
 
-  const inPlatformX =
-    entity.x + entity.radius > platform.x - platform.w * 0.5 &&
-    entity.x - entity.radius < platform.x + platform.w * 0.5;
+  let landingY = Infinity;
+  for (const platform of platforms) {
+    const inPlatformX =
+      entity.x + entity.radius > platform.x - platform.w * 0.5 &&
+      entity.x - entity.radius < platform.x + platform.w * 0.5;
 
-  const crossingTop =
-    entity.vy >= 0 &&
-    entity.y + entity.radius >= platform.y - platform.h * 0.5 &&
-    entity.y + entity.radius - entity.vy * dt <= platform.y - platform.h * 0.5;
+    const topY = platform.y - platform.h * 0.5;
+    const crossingTop =
+      entity.vy >= 0 &&
+      entity.y + entity.radius >= topY &&
+      entity.y + entity.radius - entity.vy * dt <= topY;
 
-  if (inPlatformX && crossingTop) {
-    entity.y = platform.y - platform.h * 0.5 - entity.radius;
+    if (inPlatformX && crossingTop) {
+      landingY = Math.min(landingY, topY - entity.radius);
+    }
+  }
+
+  if (landingY !== Infinity) {
+    entity.y = landingY;
     entity.vy = 0;
     entity.onGround = true;
   }
@@ -103,7 +111,7 @@ export function update(state, config, dt) {
     }
 
     const input = inputForEntity(entity, state, dt);
-    updateMovement(entity, input, dt, config.world, config.platform);
+    updateMovement(entity, input, dt, config.world, config.platforms);
   }
 
   for (let i = 0; i < state.entities.length; i += 1) {

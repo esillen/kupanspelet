@@ -1,4 +1,4 @@
-function drawArena(ctx, world, platform) {
+function drawArena(ctx, world, platforms) {
   ctx.clearRect(0, 0, world.width, world.height);
 
   const floorHeight = world.height - world.floorY;
@@ -8,13 +8,15 @@ function drawArena(ctx, world, platform) {
   ctx.fillStyle = "#166534";
   ctx.fillRect(0, world.floorY - 10, world.width, 10);
 
-  const px = platform.x - platform.w * 0.5;
-  const py = platform.y - platform.h * 0.5;
+  for (const platform of platforms) {
+    const px = platform.x - platform.w * 0.5;
+    const py = platform.y - platform.h * 0.5;
 
-  ctx.fillStyle = "#78350f";
-  ctx.fillRect(px, py, platform.w, platform.h);
-  ctx.fillStyle = "rgba(255,255,255,0.14)";
-  ctx.fillRect(px, py, platform.w, 6);
+    ctx.fillStyle = "#78350f";
+    ctx.fillRect(px, py, platform.w, platform.h);
+    ctx.fillStyle = "rgba(255,255,255,0.14)";
+    ctx.fillRect(px, py, platform.w, 6);
+  }
 }
 
 function drawEvolutionParts(ctx, entity) {
@@ -96,7 +98,7 @@ function drawEntity(ctx, entity) {
 }
 
 export function render(ctx, entities, config) {
-  drawArena(ctx, config.world, config.platform);
+  drawArena(ctx, config.world, config.platforms);
   for (const entity of entities) {
     drawEntity(ctx, entity);
   }
