@@ -170,7 +170,7 @@ function drawEntity(ctx, entity) {
   ctx.fillStyle = "#111827";
   ctx.fill();
 
-  const tag = entity.kind === "npc" ? "NPC" : `P${entity.id + 1}`;
+  const tag = entity.kind === "npc" ? "NPC" : `P${(entity.controlSlot ?? entity.id) + 1}${entity.isShard ? "S" : ""}`;
   ctx.fillStyle = "rgba(15, 23, 42, 0.65)";
   ctx.font = `${Math.max(12, entity.radius * 0.42)}px sans-serif`;
   ctx.textAlign = "center";

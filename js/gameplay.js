@@ -1,6 +1,12 @@
 import { inputForEntity } from "./input.js";
-import { handleEat, respawnEntity } from "./entities.js";
-import { ARMOR_PICKUP_RADIUS, ARMOR_RESPAWN_TIME } from "./config.js";
+import { createSplitShards, handleEat, respawnEntity } from "./entities.js";
+import {
+  ARMOR_PICKUP_RADIUS,
+  ARMOR_RESPAWN_TIME,
+  DOUBLE_JUMP_COOLDOWN,
+  GIANT_SPLIT_RADIUS,
+  GIANT_SPLIT_SHARD_COUNT,
+} from "./config.js";
 
 function randomArmorSpawn(config) {
   const onPlatform = Math.random() < 0.72 && config.platforms.length > 0;
@@ -41,11 +47,27 @@ function isBlockedByArmor(attacker, victim) {
   return victim.armorSide === incomingSide;
 }
 
+function shouldSplitOnStomp(victim, reason) {
+  return reason === "stomp" && victim.kind === "player" && !victim.isShard && victim.radius >= GIANT_SPLIT_RADIUS;
+}
+
+function defeatEntity(attacker, victim, reason, state, config) {
+  if (shouldSplitOnStomp(victim, reason)) {
+    const shards = createSplitShards(victim, config.world, state.nextEntityId, GIANT_SPLIT_SHARD_COUNT);
+    state.nextEntityId += shards.length;
+    state.entities.push(...shards);
+    handleEat(attacker, victim, { skipRespawn: true });
+    return;
+  }
+
+  handleEat(attacker, victim);
+}
+
 function canUseSword(entity) {
   return entity.evolutionStage >= 1;
 }
 
-function trySwordAttack(attacker, entities) {
+function trySwordAttack(attacker, state, config) {
   if (!canUseSword(attacker) || attacker.attackCooldown > 0) return;
 
   const facing = attacker.facing || 1;
@@ -53,7 +75,7 @@ function trySwordAttack(attacker, entities) {
   let target = null;
   let bestDistance = Infinity;
 
-  for (const victim of entities) {
+  for (const victim of state.entities) {
     if (!victim.alive || victim.id === attacker.id) continue;
     if (victim.invulnTimer > 0) continue;
 
@@ -74,7 +96,7 @@ function trySwordAttack(attacker, entities) {
   attacker.attackCooldown = 0.45;
   if (target) {
     if (isBlockedByArmor(attacker, target)) return;
-    handleEat(attacker, target);
+    defeatEntity(attacker, target, "sword", state, config);
   }
 }
 
@@ -108,7 +130,7 @@ function updateArmorPickup(state, config, dt) {
   }
 }
 
-function resolveBlobCollision(a, b) {
+function resolveBlobCollision(a, b, state, config) {
   if (!a.alive || !b.alive) return;
   if (a.invulnTimer > 0 || b.invulnTimer > 0) return;
 
@@ -132,9 +154,9 @@ function resolveBlobCollision(a, b) {
   const bStomp = b.vy > 220 && b.y < a.y - a.radius * 0.2;
 
   if (aStomp && !bStomp) {
-    handleEat(a, b);
+    defeatEntity(a, b, "stomp", state, config);
   } else if (bStomp && !aStomp) {
-    handleEat(b, a);
+    defeatEntity(b, a, "stomp", state, config);
   } else {
     const bounce = 0.92;
     const tempVx = a.vx;
@@ -151,14 +173,18 @@ function updateMovement(entity, input, dt, world, platforms) {
   const jumpBase = entity.kind === "npc" ? 980 : 1040;
   const jumpSizePenalty = entity.kind === "npc" ? 4.4 : 4.8;
   const maxSpeed = Math.max(230, speedBase - entity.radius * 2.2);
+  const jumpPressed = input.jump && !entity.jumpHeld;
 
   entity.vx += input.move * 1800 * dt;
   entity.vx *= 0.85;
   entity.vx = Math.max(-maxSpeed, Math.min(maxSpeed, entity.vx));
 
-  if (input.jump && entity.onGround && !entity.jumpHeld) {
+  if (jumpPressed && entity.onGround) {
     entity.vy = -Math.max(430, jumpBase - entity.radius * jumpSizePenalty);
     entity.onGround = false;
+  } else if (jumpPressed && entity.kind === "player" && entity.doubleJumpCooldown <= 0) {
+    entity.vy = -Math.max(450, jumpBase - entity.radius * (jumpSizePenalty - 0.7));
+    entity.doubleJumpCooldown = DOUBLE_JUMP_COOLDOWN;
   }
   entity.jumpHeld = input.jump;
 
@@ -223,6 +249,9 @@ export function update(state, config, dt) {
     if (entity.attackTimer > 0) {
       entity.attackTimer -= dt;
     }
+    if (entity.doubleJumpCooldown > 0) {
+      entity.doubleJumpCooldown -= dt;
+    }
 
     const input = inputForEntity(entity, state, dt);
     if (input.move !== 0) {
@@ -231,14 +260,14 @@ export function update(state, config, dt) {
     updateMovement(entity, input, dt, config.world, config.platforms);
 
     if (input.attack && !entity.attackHeld) {
-      trySwordAttack(entity, state.entities);
+      trySwordAttack(entity, state, config);
     }
     entity.attackHeld = input.attack;
   }
 
   for (let i = 0; i < state.entities.length; i += 1) {
     for (let j = i + 1; j < state.entities.length; j += 1) {
-      resolveBlobCollision(state.entities[i], state.entities[j]);
+      resolveBlobCollision(state.entities[i], state.entities[j], state, config);
     }
   }
 

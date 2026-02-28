@@ -5,6 +5,10 @@ export const PLAYER_RESPAWN_TIME = 0;
 export const NPC_RESPAWN_TIME = 2.0;
 export const ARMOR_RESPAWN_TIME = 6.0;
 export const ARMOR_PICKUP_RADIUS = 14;
+export const GIANT_SPLIT_RADIUS = 52;
+export const GIANT_SPLIT_SHARD_COUNT = 3;
+export const SHARD_BASE_RADIUS = 14;
+export const DOUBLE_JUMP_COOLDOWN = 5.0;
 
 export const KEYMAPS = [
   { left: "KeyA", right: "KeyD", jump: "KeyW", attack: "KeyB" },
