@@ -11,18 +11,19 @@ import {
 
 export function createEntity(id, kind, world) {
   const baseRadius = kind === "npc" ? 15 + Math.random() * 6 : 24;
+  const isNpc = kind === "npc";
   return {
     id,
     kind,
     x: 100 + (id * 129) % (world.width - 180),
-    y: world.floorY - baseRadius,
+    y: isNpc ? world.floorY - baseRadius : baseRadius + 8,
     vx: 0,
     vy: 0,
     radius: baseRadius,
     baseRadius,
     mass: baseRadius * baseRadius,
     alive: true,
-    onGround: false,
+    onGround: isNpc,
     jumpHeld: false,
     color: kind === "player" ? PLAYER_COLORS[id % PLAYER_COLORS.length] : NPC_COLOR,
     keyboardMap: KEYMAPS[id] || KEYMAPS[KEYMAPS.length - 1],

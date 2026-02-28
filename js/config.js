@@ -2,7 +2,7 @@ export const HUMAN_PLAYER_COUNT = 4;
 export const NPC_COUNT = 8;
 export const EVOLUTION_THRESHOLDS = [2, 4, 7];
 export const PLAYER_RESPAWN_TIME = 2.2;
-export const NPC_RESPAWN_TIME = 3.2;
+export const NPC_RESPAWN_TIME = 2.0;
 
 export const KEYMAPS = [
   { left: "KeyA", right: "KeyD", jump: "KeyW" },
