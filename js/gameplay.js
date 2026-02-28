@@ -47,12 +47,13 @@ function isBlockedByArmor(attacker, victim) {
   return victim.armorSide === incomingSide;
 }
 
-function shouldSplitOnStomp(victim, reason) {
-  return reason === "stomp" && victim.kind === "player" && !victim.isShard && victim.radius >= GIANT_SPLIT_RADIUS;
+function shouldSplitOnDefeat(victim, reason) {
+  const splitReason = reason === "stomp" || reason === "sword";
+  return splitReason && victim.kind === "player" && !victim.isShard && victim.radius >= GIANT_SPLIT_RADIUS;
 }
 
 function defeatEntity(attacker, victim, reason, state, config) {
-  if (shouldSplitOnStomp(victim, reason)) {
+  if (shouldSplitOnDefeat(victim, reason)) {
     const shards = createSplitShards(victim, config.world, state.nextEntityId, GIANT_SPLIT_SHARD_COUNT);
     state.nextEntityId += shards.length;
     state.entities.push(...shards);
